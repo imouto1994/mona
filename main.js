@@ -12,7 +12,7 @@ function parseDataUrl(dataUrl) {
   return { mime: matches[1], buffer: Buffer.from(matches[2], "base64") };
 }
 
-(async () => {
+async function scrapeURL(url) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -27,12 +27,11 @@ function parseDataUrl(dataUrl) {
   await page.setCookie({
     name: "RSESSION",
     value:
-      "WVRnWUY1akxYRmQ4eDk4OEJMMmphZWZ1c1ZtTTByTmQ3UkhYUncyKzBkSHlsRytZajNybWVoQjJ2aGlXU1UwS3Ezc3MrN2JWci81dHVXUU8rcXppKzJFSHlIOVRMcmNwU0ZnRFo5dE1kek5vZCtLQUtkYU5TYTRHNWJXb1YrWElUb2E0aWlzalp2RUpGd3dya1pwWk1nMmxZeDBRWlhmdklFd3BXL0x2UHRwekFXKzUzWUpZWTcvYXNjR0NwSG84NWoxL05xMXdzaG9xc0YvVUxaR2pCeWM1MHowTzI4cklJeUJUWm5FWTV3eXBzcFNtYXZGNHpHWHJjeVNadVk1UHZwa1dlUXFpTEVBWklkQ3ZwbHVEeXB5WkE4ZTJCVk5DUklacmszQThVVlY0UmphczdiRmJDK1pnQzBJR2dhUE1ya0MxRVYzQ0tXS0RDcDBTTnhUS1JUVWJBUy9zZHNpYXVqbzMwbTJ5V2o5SFFiTzdvT2tOWjFKa2NzMFRRakkyLS0vT0Jlc1pSek5zeU9xaDZ1aGJFd3RRPT0%3D--609abb1ee0f62e3b196ba7a60b60250c7d4365b8",
+      "ODJoYmJMQWFDUUpXQko0NWZIRjAzRXNHSHNBNjJ6UHBQdmJ0ZHVxMXExNExoNEZSMlEyYTNhMHNxYzJIWi95dklMdEVHVkx0cy9xZ0VIL1M3dS81RW41dWtMWEFiY29LNUVPUm9SVFBtWHNiRU5MOVovcDBvNkZ1bTFLalh5V0NHaDFnbXZSWE5qc0xSbTVmSVFFZm1hZCtxd0ZGa2lUYnZiUUhJYjFEVW5sYnY5Z0tCdWpndmF3NTZsSjl0MWxNQXdkQXRRT1FNaFpmcFBRN0w2ek5aQitxVWJuNkh5UTdaRjJ1YS9MZ29mbFcxR1Y3cXI5alhkMjczUm5YQUxiaEFXSjR4RkNLYWsxRlNrejBWb3lKMndwUmdyUTltUm51ZktUdWs2b1hpZFRGUG03cjAzSlJiRExvUTM5bFhmOUExOE5JY0NxYjFPUERqY2tnWmZHeG5OUkhOM01sOG8zNW84dlZKZHdubVJMcFZkdzJMaERGN0dXTFBrQ1B0SU9hLS1QTUZLdFlibC9wakJEcnZMRjhneXRRPT0%3D--a93830c14aae36f065ce5f602651f40d9e03a142",
     domain: "www.lezhinus.com",
     path: "/",
   });
 
-  const url = "https://www.lezhinus.com/en/comic/touch_en/5";
   const folderName = url.substring(url.indexOf("comic/")).split("/").join("-");
   const folderPath = path.resolve(__dirname, `./dist/${folderName}`);
   await fs.mkdir(folderPath, { recursive: true });
@@ -42,10 +41,7 @@ function parseDataUrl(dataUrl) {
   page.on("request", (request) => {
     const url = request.url();
     if (url.startsWith("https://cdn.lezhin.com/v2/")) {
-      const endIndex = url.indexOf("&");
-      const optimizedUrl = url
-        .substring(0, endIndex !== -1 ? endIndex : undefined)
-        .replace("webp", "jpg");
+      const optimizedUrl = url.replace("webp", "jpg").replace("q=30", "q=100");
       console.log("OPTIMIZED URL", optimizedUrl);
       request.continue({ url: optimizedUrl });
     } else {
@@ -108,4 +104,10 @@ function parseDataUrl(dataUrl) {
   await page.waitForTimeout(1000);
 
   await browser.close();
+}
+
+(async () => {
+  for (let i = 65; i <= 75; i++) {
+    await scrapeURL(`https://www.lezhinus.com/en/comic/bodygood/${i}`);
+  }
 })();
